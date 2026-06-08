@@ -1,9 +1,9 @@
 Package: gothiclockpicker
-Title: What the Package Does (One Line, Title Case)
+Title: Solve lock picking puzzles in Gothic 1 Remake
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Antonio", "Vargas", , "antonio.ravon.vargas@gmail.com", role = c("aut", "cre"))
+Description: This package contains code to find optimal solutions to lockpicking puzzles in the video game Gothic 1 Remake.
 License: MIT + file LICENSE
 Suggests: 
     testthat (>= 3.0.0)
