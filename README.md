@@ -1,0 +1,61 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# gothiclockpicker
+
+<!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/szego/gothiclockpicker/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/szego/gothiclockpicker/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
+gothiclockpicker finds optimal solutions to the lockpicking puzzles in
+the video game *Gothic 1 Remake*.
+
+A lock has several pins, each sitting in their own shackle. Every
+operation (sliding a shackle) shifts the selected pin and other pins in
+the lock by either left or right. The aim is to bring all pins to their
+center position. Given the starting positions and the effect of each
+shackle slide, `pick_lock()` returns a shortest sequence of moves that
+solves the lock. By default it finds the solution that minimizes
+switching between shackles, which tends to be the easiest to perform in
+game.
+
+## Installation
+
+You can install the development version of gothiclockpicker from
+[GitHub](https://github.com/szego/gothiclockpicker) with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("szego/gothiclockpicker")
+```
+
+## Example
+
+``` r
+library(gothiclockpicker)
+
+# A lock with four pins. Each list element is the effect of one operation.
+start <- c(-3, 3, -3, 0)
+ops <- list(
+  c(1, 0, 0, 0),
+  c(1, -1, 0, 1),
+  c(-1, 0, 1, 0),
+  c(0, 0, 0, 1)
+)
+
+pick_lock(start, ops)
+#> Solved in 12 step(s).
+#> 
+#> Start: (-3, 3, -3, 0) 
+#>   + 2 x3  ->  (0, 0, -3, 3)
+#>   + 3 x3  ->  (-3, 0, 0, 3)
+#>   - 4 x3  ->  (-3, 0, 0, 0)
+#>   + 1 x3  ->  (0, 0, 0, 0)
+#> Target reached.
+```
+
+Each step shows the shackle to use and its direction (`+`/`-`), and
+consecutive repeats of the same operation are grouped together.
