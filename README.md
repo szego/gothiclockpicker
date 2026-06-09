@@ -57,13 +57,13 @@ already at position 0.
 
 We can write this initial state as a vector, `c(-1, 0, 1, 0, 0, 0)`.
 
-Next, we need to record what moving each shackle does. Below is a gif
-showing each shackle’s effect, with the selected shackles highlighted in
-blue.
+Next, we need to record what moving each shackle does. **Below is a gif
+showing each shackle’s effect, with the selected shackle highlighted in
+blue.**
 
-The first shackle’s effect is shown in the top-left. Moving to the right
-causes the third and fourth shackle to move right and the fifth shackle
-to move left. We can express this operation as a vector,
+The first shackle’s effect is shown in the top-left. Moving it to the
+right causes the third and fourth shackle to move right and the fifth
+shackle to move left. We can express this operation as a vector,
 `c(1, 0, 1, 1, -1, 0)`.
 
 The second shackle’s effect is shown in the top-right. Moving it to the
