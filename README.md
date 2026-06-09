@@ -122,4 +122,4 @@ is:
 - “+ 5 x5” - Move the fifth shackle to the right five times
 - “- 4 x2” - Move the fourth shackle to the left twice
 - “- 6 x3” - Move the sixth shackle to the left three times
-- “- 2 x3” move the second shackle to the left three times
+- “- 2 x3” - Move the second shackle to the left three times
