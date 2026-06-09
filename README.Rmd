@@ -62,6 +62,7 @@ Moving the second shackle to the right causes the first shackle to move to the r
 Moving the third shackle causes the first shackle to move to the right and the sixth shackle to move to the left: `c(1, 0, 1, 0, 0, -1)`.
 
 And the operations for the fourth, fifth, and sixth shackles are
+
 * `c(0, 0, 0, 1, 0, 0)`
 * `c(1, 0, 0, 0, 1, 0)`
 * `c(0, -1, 0, 0, 1, 1)`
@@ -87,6 +88,7 @@ pick_lock(start, ops)
 Each step shows the shackle to slide and its direction (`+`/`-`), and consecutive repeats of the same operation are grouped together. For example, the first line says "+ 1 x2", which means move the first shackle (1) to the right (+) twice (x2).
 
 The full set of moves to solve the lock starting from the initial state is:
+
 * "+ 1 x2" - Move the first shackle to the right twice
 * "- 3 x3" - Move the third shackle to the left three times
 * "+ 5 x5" - Move the fifth shackle to the right five times

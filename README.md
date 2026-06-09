@@ -73,8 +73,11 @@ to the right: `c(1, 1, 0, 0, 0, 0)`.
 Moving the third shackle causes the first shackle to move to the right
 and the sixth shackle to move to the left: `c(1, 0, 1, 0, 0, -1)`.
 
-And the operations for the fourth, fifth, and sixth shackles are \*
-`c(0, 0, 0, 1, 0, 0)` \* `c(1, 0, 0, 0, 1, 0)` \* `c(0, -1, 0, 0, 1, 1)`
+And the operations for the fourth, fifth, and sixth shackles are
+
+- `c(0, 0, 0, 1, 0, 0)`
+- `c(1, 0, 0, 0, 1, 0)`
+- `c(0, -1, 0, 0, 1, 1)`
 
 We pass that initial state and these six operations to `pick_lock()`,
 which will print the sequence of shackle moves we need to make to solve
@@ -112,9 +115,11 @@ example, the first line says “+ 1 x2”, which means move the first
 shackle (1) to the right (+) twice (x2).
 
 The full set of moves to solve the lock starting from the initial state
-is: \* “+ 1 x2” - Move the first shackle to the right twice \* “- 3
-x3” - Move the third shackle to the left three times \* “+ 5 x5” - Move
-the fifth shackle to the right five times \* “- 4 x2” - Move the fourth
-shackle to the left twice \* “- 6 x3” - Move the sixth shackle to the
-left three times \* “- 2 x3” move the second shackle to the left three
-times
+is:
+
+- “+ 1 x2” - Move the first shackle to the right twice
+- “- 3 x3” - Move the third shackle to the left three times
+- “+ 5 x5” - Move the fifth shackle to the right five times
+- “- 4 x2” - Move the fourth shackle to the left twice
+- “- 6 x3” - Move the sixth shackle to the left three times
+- “- 2 x3” move the second shackle to the left three times
