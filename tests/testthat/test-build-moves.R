@@ -6,5 +6,8 @@ test_that("build_moves pairs each operation with a +/- move whose delta matches"
   for (move in moves) {
     expect_equal(move$delta, move$sign * ops[[move$op]])
   }
-  expect_setequal(vapply(moves, function(move) move$sign, numeric(1)), c(1, -1, 1, -1))
+  expect_setequal(
+    vapply(moves, function(move) move$sign, numeric(1)),
+    c(1, -1, 1, -1)
+  )
 })

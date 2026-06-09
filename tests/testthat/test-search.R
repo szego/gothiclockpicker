@@ -3,11 +3,20 @@ test_that("pick_lock_bfs_quick returns a valid shortest path", {
   goal <- rep(0, length(problem$start))
   solution <- pick_lock_bfs_quick(problem$start, problem$ops)
 
-  expect_true(solution_path_is_valid(solution, problem$start, problem$ops, goal))
+  expect_true(solution_path_is_valid(
+    solution,
+    problem$start,
+    problem$ops,
+    goal
+  ))
 })
 
 test_that("pick_lock_bfs_quick handles start equal to goal with no moves", {
-  solution <- pick_lock_bfs_quick(c(0, 0), list(c(1, 0), c(0, 1)), goal = c(0, 0))
+  solution <- pick_lock_bfs_quick(
+    c(0, 0),
+    list(c(1, 0), c(0, 1)),
+    goal = c(0, 0)
+  )
 
   expect_equal(nrow(solution$moves), 0)
   expect_length(solution$states, 1)

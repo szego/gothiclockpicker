@@ -4,7 +4,12 @@ test_that("refine_full_bfs_solution returns a valid path of the optimal length",
   bfs <- pick_lock_bfs_full(problem$start, problem$ops)
   solution <- refine_full_bfs_solution(bfs)
 
-  expect_true(solution_path_is_valid(solution, problem$start, problem$ops, goal))
+  expect_true(solution_path_is_valid(
+    solution,
+    problem$start,
+    problem$ops,
+    goal
+  ))
   expect_equal(nrow(solution$moves), bfs$goal_distance)
 })
 

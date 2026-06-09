@@ -11,6 +11,11 @@ test_that("pick_lock solves the small example via the refined path", {
   solution <- pick_lock(problem$start, problem$ops, refine = TRUE)
 
   expect_equal(nrow(solution$moves), small_problem_solution_length)
-  expect_true(solution_path_is_valid(solution, problem$start, problem$ops, goal))
+  expect_true(solution_path_is_valid(
+    solution,
+    problem$start,
+    problem$ops,
+    goal
+  ))
   expect_false(is.null(solution$switches))
 })
