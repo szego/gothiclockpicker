@@ -23,16 +23,16 @@ print.solution <- function(x, ...) {
     for (run_index in seq_along(move_runs$lengths)) {
       first_index <- start_indices[run_index]
       repetitions <- move_runs$lengths[run_index]
-      sign_symbol <- if (moves$sign[first_index] > 0) "+" else "-"
+      move_direction <- if (moves$sign[first_index] > 0) "right" else "left"
       repetition_label <- if (repetitions > 1) {
         sprintf(" x%d", repetitions)
       } else {
         ""
       }
       cat(sprintf(
-        "  %s %d%s  ->  %s\n",
-        sign_symbol,
+        "  %d %s%s ->  %s\n",
         moves$op[first_index],
+        move_direction,
         repetition_label,
         format_state(states[[end_indices[run_index] + 1]])
       ))
