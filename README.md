@@ -102,26 +102,26 @@ pick_lock(start, ops)
 #> Solved in 18 step(s).
 #> 
 #> Start: (-1, 0, 1, 0, 0, 0) 
-#>   + 1 x2  ->  (1, 0, 3, 2, -2, 0)
-#>   - 3 x3  ->  (-2, 0, 0, 2, -2, 3)
-#>   + 5 x5  ->  (3, 0, 0, 2, 3, 3)
-#>   - 4 x2  ->  (3, 0, 0, 0, 3, 3)
-#>   - 6 x3  ->  (3, 3, 0, 0, 0, 0)
-#>   - 2 x3  ->  (0, 0, 0, 0, 0, 0)
+#>   1 right x2 ->  (1, 0, 3, 2, -2, 0)
+#>   3 left x3 ->  (-2, 0, 0, 2, -2, 3)
+#>   5 right x5 ->  (3, 0, 0, 2, 3, 3)
+#>   4 left x2 ->  (3, 0, 0, 0, 3, 3)
+#>   6 left x3 ->  (3, 3, 0, 0, 0, 0)
+#>   2 left x3 ->  (0, 0, 0, 0, 0, 0)
 #> Target reached.
 ```
 
-Each step shows the shackle to slide and its direction (`+`/`-`), and
+Each step shows the shackle to slide and its direction (left/right), and
 consecutive repeats of the same operation are grouped together. For
-example, the first line says “+ 1 x2”, which means move the first
-shackle (1) to the right (+) twice (x2).
+example, the first line says “1 right x2”, which means move the first
+shackle (1) to the right twice (x2).
 
 The full set of moves to solve the lock starting from the initial state
 is:
 
-- “+ 1 x2” - Move the first shackle to the right twice
-- “- 3 x3” - Move the third shackle to the left three times
-- “+ 5 x5” - Move the fifth shackle to the right five times
-- “- 4 x2” - Move the fourth shackle to the left twice
-- “- 6 x3” - Move the sixth shackle to the left three times
-- “- 2 x3” - Move the second shackle to the left three times
+- 1 right x2 - Move the first shackle to the right twice
+- 3 left x3 - Move the third shackle to the left three times
+- 5 right x5 - Move the fifth shackle to the right five times
+- 4 left x2 - Move the fourth shackle to the left twice
+- 6 left x3 - Move the sixth shackle to the left three times
+- 2 left x3 - Move the second shackle to the left three times
