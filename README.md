@@ -42,8 +42,8 @@ Definitions:
 
 1.  The shackles are numbered starting from 1, the nearest shackle.
 2.  A shackle is at “position zero” when its pin is in the middle hole.
-3.  Moving a shackle to the right increases the position, and moving a
-    shackle to the left decreases the position.
+3.  Moving a shackle to the right increases its position, and moving a
+    shackle to the left decreases its position.
 
 Here’s an example of the initial state of a lock:
 
@@ -57,18 +57,20 @@ already at position 0.
 
 We can write this initial state as a vector, `c(-1, 0, 1, 0, 0, 0)`.
 
-Next, we need to record what moving each shackle does. Here’s a gif
+Next, we need to record what moving each shackle does. Below is a gif
 showing each shackle’s effect, with the selected shackles highlighted in
-blue:
+blue.
+
+The first shackle’s effect is shown in the top-left. Moving to the right
+causes the third and fourth shackle to move right and the fifth shackle
+to move left. We can express this operation as a vector,
+`c(1, 0, 1, 1, -1, 0)`.
+
+The second shackle’s effect is shown in the top-right. Moving it to the
+right causes the first shackle to move to the right:
+`c(1, 1, 0, 0, 0, 0)`.
 
 <img src="man/images/operations.gif" align="center" alt="a lock with six shackles" />
-
-Moving the first shackle to the right causes the third and fourth
-shackle to move right and the fifth shackle to move left. We can express
-this operation as a vector, `c(1, 0, 1, 1, -1, 0)`.
-
-Moving the second shackle to the right causes the first shackle to move
-to the right: `c(1, 1, 0, 0, 0, 0)`.
 
 Moving the third shackle causes the first shackle to move to the right
 and the sixth shackle to move to the left: `c(1, 0, 1, 0, 0, -1)`.
