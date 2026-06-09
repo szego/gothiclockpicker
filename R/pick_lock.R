@@ -181,9 +181,10 @@ pick_lock_bfs_quick <- function(
 #'
 #' @inheritParams pick_lock
 #' @return A list capturing the explored layered graph: `encode` (state -> integer
-#'   code), `id_of` (code -> compact state id), `state_of` and `distance_of`
-#'   (indexed by code), `goal_distance`, `moves`, `max_abs`, `num_states`, and
-#'   the `start_code` and `goal_code`.
+#'   code), `id_of` (a dense vector mapping code -> compact state id, 0 when
+#'   undiscovered), `state_of_id` and `distance_of_id` (packed, indexed by id),
+#'   `goal_distance`, `moves`, `max_abs`, `num_states`, and the `start_id` and
+#'   `goal_id`.
 #' @noRd
 pick_lock_bfs_full <- function(
   start,
@@ -197,40 +198,52 @@ pick_lock_bfs_full <- function(
   codec <- make_state_codec(length(start), max_abs)
   encode <- codec$encode
 
-  distance_of <- rep(NA_integer_, codec$space_size)
-  state_of <- vector("list", codec$space_size)
+  id_of <- integer(codec$space_size) # code -> compact id (0 = undiscovered)
+  capacity <- 1024
+  state_of_id <- vector("list", capacity)
+  distance_of_id <- numeric(capacity)
+
   start_code <- encode(start)
   goal_code <- encode(goal)
-  distance_of[start_code] <- 0
-  state_of[[start_code]] <- start
+  num_states <- 1
+  id_of[start_code] <- num_states
+  state_of_id[[num_states]] <- start
+  distance_of_id[num_states] <- 0
 
   goal_distance <- if (start_code == goal_code) 0 else NA_integer_
   depth <- 0
-  current_layer_codes <- start_code
+  current_layer_ids <- num_states
   while (is.na(goal_distance) || depth < goal_distance) {
-    next_layer_codes <- list()
-    for (state_code in current_layer_codes) {
-      current_state <- state_of[[state_code]]
+    next_layer_ids <- list()
+    for (state_id in current_layer_ids) {
+      current_state <- state_of_id[[state_id]]
       for (move in moves) {
         candidate <- current_state + move$delta
         if (any(abs(candidate) > max_abs)) {
           next
         }
         candidate_code <- encode(candidate)
-        if (!is.na(distance_of[candidate_code])) {
+        if (id_of[candidate_code] != 0) {
           next
         }
-        distance_of[candidate_code] <- depth + 1
-        state_of[[candidate_code]] <- candidate
-        next_layer_codes[[length(next_layer_codes) + 1]] <- candidate_code
+        num_states <- num_states + 1
+        if (num_states > capacity) {
+          capacity <- capacity * 2
+          length(state_of_id) <- capacity
+          length(distance_of_id) <- capacity
+        }
+        id_of[candidate_code] <- num_states
+        state_of_id[[num_states]] <- candidate
+        distance_of_id[num_states] <- depth + 1
+        next_layer_ids[[length(next_layer_ids) + 1]] <- num_states
         if (candidate_code == goal_code) goal_distance <- depth + 1
       }
     }
-    if (length(next_layer_codes) == 0) {
+    if (length(next_layer_ids) == 0) {
       break
     }
     depth <- depth + 1
-    current_layer_codes <- unlist(next_layer_codes)
+    current_layer_ids <- unlist(next_layer_ids)
   }
   if (is.na(goal_distance)) {
     stop(
@@ -238,21 +251,19 @@ pick_lock_bfs_full <- function(
     )
   }
 
-  reachable_codes <- which(!is.na(distance_of))
-  id_of <- integer(codec$space_size)
-  id_of[reachable_codes] <- seq_along(reachable_codes)
-
+  length(state_of_id) <- num_states
+  length(distance_of_id) <- num_states
   list(
     encode = encode,
     id_of = id_of,
-    state_of = state_of,
-    distance_of = distance_of,
+    state_of_id = state_of_id,
+    distance_of_id = distance_of_id,
     goal_distance = goal_distance,
     moves = moves,
     max_abs = max_abs,
-    num_states = length(reachable_codes),
-    start_code = start_code,
-    goal_code = goal_code
+    num_states = num_states,
+    start_id = id_of[start_code],
+    goal_id = id_of[goal_code]
   )
 }
 
@@ -270,8 +281,8 @@ pick_lock_bfs_full <- function(
 refine_full_bfs_solution <- function(bfs) {
   encode <- bfs$encode
   id_of <- bfs$id_of
-  state_of <- bfs$state_of
-  distance_of <- bfs$distance_of
+  state_of_id <- bfs$state_of_id
+  distance_of_id <- bfs$distance_of_id
   goal_distance <- bfs$goal_distance
   moves <- bfs$moves
   max_abs <- bfs$max_abs
@@ -279,58 +290,50 @@ refine_full_bfs_solution <- function(bfs) {
 
   no_previous_op <- 0
   slots_per_state <- num_ops + 1 # one slot per possible last op, plus "none"
-  best_at <- vector("list", bfs$num_states * slots_per_state)
-  augmented_index <- function(state_id, last_op) {
+  num_slots <- bfs$num_states * slots_per_state
+
+  # The augmented slot already encodes (state id, last op), and the op that
+  # reaches a slot is its last op, so each slot needs only these three fields.
+  switches_at <- rep(NA_real_, num_slots)
+  parent_at <- rep(NA_real_, num_slots)
+  sign_at <- rep(NA_real_, num_slots)
+  slot_of <- function(state_id, last_op) {
     (state_id - 1) * slots_per_state + last_op + 1
   }
 
-  start_slot <- augmented_index(id_of[bfs$start_code], no_previous_op)
-  best_at[[start_slot]] <- list(
-    state = state_of[[bfs$start_code]],
-    last_op = no_previous_op,
-    switches = 0,
-    parent = NA_integer_,
-    op = NA_integer_,
-    sign = NA_integer_
-  )
+  start_slot <- slot_of(bfs$start_id, no_previous_op)
+  switches_at[start_slot] <- 0
 
   frontier_slots <- start_slot
   if (goal_distance > 0) {
     for (layer in seq_len(goal_distance)) {
       next_frontier_slots <- list()
       for (slot in frontier_slots) {
-        record <- best_at[[slot]]
-        current_state <- record$state
-        last_op <- record$last_op
+        state_id <- (slot - 1) %/% slots_per_state + 1
+        last_op <- (slot - 1) %% slots_per_state
+        current_state <- state_of_id[[state_id]]
+        current_switches <- switches_at[slot]
         for (move in moves) {
           candidate <- current_state + move$delta
           if (any(abs(candidate) > max_abs)) {
             next
           }
-          candidate_code <- encode(candidate)
-          if (
-            is.na(distance_of[candidate_code]) ||
-              distance_of[candidate_code] != layer
-          ) {
+          candidate_id <- id_of[encode(candidate)]
+          if (candidate_id == 0 || distance_of_id[candidate_id] != layer) {
             next
           }
-          switch_count <- record$switches +
+          switch_count <- current_switches +
             (if (last_op == no_previous_op || last_op == move$op) 0 else 1)
-          candidate_slot <- augmented_index(id_of[candidate_code], move$op)
-          existing <- best_at[[candidate_slot]]
-          if (is.null(existing) || switch_count < existing$switches) {
-            best_at[[candidate_slot]] <- list(
-              state = candidate,
-              last_op = move$op,
-              switches = switch_count,
-              parent = slot,
-              op = move$op,
-              sign = move$sign
-            )
-            if (is.null(existing)) {
+          candidate_slot <- slot_of(candidate_id, move$op)
+          existing_switches <- switches_at[candidate_slot]
+          if (is.na(existing_switches) || switch_count < existing_switches) {
+            if (is.na(existing_switches)) {
               next_frontier_slots[[length(next_frontier_slots) + 1]] <-
                 candidate_slot
             }
+            switches_at[candidate_slot] <- switch_count
+            parent_at[candidate_slot] <- slot
+            sign_at[candidate_slot] <- move$sign
           }
         }
       }
@@ -338,15 +341,14 @@ refine_full_bfs_solution <- function(bfs) {
     }
   }
 
-  goal_id <- id_of[bfs$goal_code]
   best_switches <- NULL
-  best_goal_slot <- NA_integer_
+  best_goal_slot <- NA_real_
   for (last_op in 0:num_ops) {
-    record <- best_at[[augmented_index(goal_id, last_op)]]
-    if (!is.null(record)) {
-      if (is.null(best_switches) || record$switches < best_switches) {
-        best_switches <- record$switches
-        best_goal_slot <- augmented_index(goal_id, last_op)
+    goal_slot <- slot_of(bfs$goal_id, last_op)
+    if (!is.na(switches_at[goal_slot])) {
+      if (is.null(best_switches) || switches_at[goal_slot] < best_switches) {
+        best_switches <- switches_at[goal_slot]
+        best_goal_slot <- goal_slot
       }
     }
   }
@@ -358,16 +360,17 @@ refine_full_bfs_solution <- function(bfs) {
   moves_reversed <- list()
   slot <- best_goal_slot
   repeat {
-    record <- best_at[[slot]]
-    states_reversed[[length(states_reversed) + 1]] <- record$state
-    if (is.na(record$parent)) {
+    state_id <- (slot - 1) %/% slots_per_state + 1
+    states_reversed[[length(states_reversed) + 1]] <- state_of_id[[state_id]]
+    parent_slot <- parent_at[slot]
+    if (is.na(parent_slot)) {
       break
     }
     moves_reversed[[length(moves_reversed) + 1]] <- list(
-      op = record$op,
-      sign = record$sign
+      op = (slot - 1) %% slots_per_state,
+      sign = sign_at[slot]
     )
-    slot <- record$parent
+    slot <- parent_slot
   }
   new_solution(
     rev(states_reversed),
